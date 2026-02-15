@@ -1,14 +1,10 @@
 /* script.js */
 
 // ============================================
+// ============================================
 // Configuration
 // ============================================
-// TODO: Replace 'YOUR_API_KEY_HERE' with your actual Google Gemini API Key.
-// You can get one here: https://aistudio.google.com/app/apikey
-const API_KEY = 'AIzaSyAhD_j04wg_PcyHz2d31UGrfNPYdG7i6kw';
-
-// Base API URL (we will determine the model dynamically)
-const BASE_URL = `https://generativelanguage.googleapis.com/v1beta`;
+// API Key is now handled on the backend!
 
 // ============================================
 // DOM Elements
@@ -283,7 +279,13 @@ function showLoading() {
  */
 async function findBestModel() {
     try {
-        const response = await fetch(`${BASE_URL}/models?key=${API_KEY}`);
+        const token = localStorage.getItem('token');
+        if (!token) return; // Cannot fetch models if not logged in (protected route)
+
+        // Fetch from OUR backend now, not Google directly
+        const response = await fetch('/api/chat/models', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
         const data = await response.json();
 
         if (data.models) {

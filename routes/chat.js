@@ -22,6 +22,22 @@ router.get('/history', protect, async (req, res) => {
     }
 });
 
+// GET /api/chat/models - Get available models (Proxied)
+router.get('/models', protect, async (req, res) => {
+    try {
+        const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+        const BASE_URL = `https://generativelanguage.googleapis.com/v1beta`;
+
+        const response = await fetch(`${BASE_URL}/models?key=${GEMINI_API_KEY}`);
+        const data = await response.json();
+
+        res.json(data);
+    } catch (err) {
+        console.error("Model Fetch Error:", err);
+        res.status(500).json({ error: "Failed to fetch models" });
+    }
+});
+
 // POST /api/chat/message - Send message & Get Reply
 router.post('/message', protect, async (req, res) => {
     try {
