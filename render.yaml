@@ -1,6 +1,7 @@
 services:
   - type: web
     name: fitbot
+    plan: free
     runtime: node
     buildCommand: npm install
     startCommand: node server.js
