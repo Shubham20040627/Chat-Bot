@@ -66,7 +66,7 @@ router.post('/message', protect, async (req, res) => {
 
         // 3. Call Google Gemini API (Server Side)
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
         // System Prompt with Context
         const systemInstruction = `YOU ARE A HEALTH & FITNESS COACH. Your name is FitBot. You provide expert advice on workouts, diet, nutrition, and mental wellness. Be motivating, energetic, and helpful. If the user asks about topics unrelated to health/fitness (like coding, math, history), politely decline and steer them back to fitness.\n\n`;
