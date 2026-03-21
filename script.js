@@ -18,6 +18,11 @@ const sendBtn = document.querySelector('.send-btn');
 const logoutBtn = document.getElementById('logoutBtn');
 const newChatBtn = document.getElementById('newChatBtn');
 const sessionList = document.getElementById('sessionList');
+const attachBtn = document.getElementById('attachBtn');
+const imageInput = document.getElementById('imageInput');
+const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+const imagePreview = document.getElementById('imagePreview');
+const removeImageBtn = document.getElementById('removeImageBtn');
 
 // Logout Logic
 if (logoutBtn) {
@@ -34,6 +39,7 @@ if (logoutBtn) {
 let isThinking = false;
 let currentModel = 'gemini-pro'; // Default fallback
 let currentSessionId = null;
+let currentBase64Image = null; // Store image data before sending
 
 // ============================================
 // Functions
@@ -161,7 +167,7 @@ async function loadSession(sessionId) {
         const history = await res.json();
 
         history.forEach(msg => {
-            addMessage(msg.message, msg.sender);
+            addMessage(msg.message, msg.sender, msg.image);
         });
 
         if (history.length === 0) {
@@ -176,8 +182,9 @@ async function loadSession(sessionId) {
  * Creates and appends a message to the chat container.
  * @param {string} text - The message content.
  * @param {string} type - 'user' or 'bot'.
+ * @param {string} imageUrl - Optional image Base64 data.
  */
-function addMessage(text, type) {
+function addMessage(text, type, imageUrl = null) {
     const messageGroup = document.createElement('div');
     messageGroup.className = `message-group ${type}`;
 
@@ -191,6 +198,7 @@ function addMessage(text, type) {
 
     const messageContentHTML = `
         <div class="message-content">
+            ${imageUrl ? `<img src="${imageUrl}" class="chat-image" alt="Uploaded Image">` : ''}
             ${type === 'bot' ? parseMarkdown(text) : `<p>${text}</p>`}
             <span class="timestamp">${getCurrentTime()}</span>
         </div>`;
@@ -311,7 +319,7 @@ async function findBestModel() {
 /**
  * Calls the API to get a response.
  */
-async function generateResponse(prompt) {
+async function generateResponse(prompt, imageBase64 = null) {
     if (isThinking) return;
     isThinking = true;
 
@@ -333,7 +341,8 @@ async function generateResponse(prompt) {
             },
             body: JSON.stringify({
                 message: prompt,
-                sessionId: currentSessionId
+                sessionId: currentSessionId,
+                image: imageBase64
             })
         });
 
@@ -366,11 +375,59 @@ async function generateResponse(prompt) {
 
 function handleSend() {
     const text = userInput.value.trim();
-    if (!text || isThinking) return;
-    addMessage(text, 'user');
+    if (!text && !currentBase64Image) return;
+    if (isThinking) return;
+    
+    // Store image locally before clearing
+    const imageToSend = currentBase64Image;
+    
+    addMessage(text || 'Sent an image', 'user', imageToSend);
     userInput.value = '';
-    generateResponse(text);
+    
+    // Clear the image preview state immediately after sending
+    clearImagePreview();
+
+    generateResponse(text, imageToSend);
 }
+
+// --- Image Attachment Handling ---
+function handleImageSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file.');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        currentBase64Image = e.target.result;
+        imagePreview.src = currentBase64Image;
+        imagePreviewContainer.style.display = 'flex';
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearImagePreview() {
+    currentBase64Image = null;
+    imageInput.value = ''; // clear file input
+    imagePreview.src = '';
+    imagePreviewContainer.style.display = 'none';
+}
+
+if (attachBtn && imageInput) {
+    attachBtn.addEventListener('click', () => {
+        imageInput.click();
+    });
+}
+if (imageInput) {
+    imageInput.addEventListener('change', handleImageSelect);
+}
+if (removeImageBtn) {
+    removeImageBtn.addEventListener('click', clearImagePreview);
+}
+// ---------------------------------
 
 function getCurrentTime() {
     return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
