@@ -41,15 +41,16 @@ router.get('/models', protect, async (req, res) => {
 // POST /api/chat/message - Send message & Get Reply
 router.post('/message', protect, async (req, res) => {
     try {
-        const { message, sessionId } = req.body;
+        const { message, sessionId, image } = req.body;
         const userId = req.user.userId;
 
         // 1. Save User Message
         const userChat = new Chat({
             user: userId,
-            session: sessionId, // Can be undefined if optional
+            session: sessionId,
             message: message,
-            sender: 'user'
+            sender: 'user',
+            image: image // Save the base64 image string
         });
         await userChat.save();
 
@@ -73,15 +74,42 @@ router.post('/message', protect, async (req, res) => {
         const dateContext = `Current System Time: ${new Date().toString()}.\n`;
         const chatHistoryContext = `\n--- RECENT CHAT HISTORY ---\n${contextMessages}\n--- END OF HISTORY ---\n`;
 
-        const finalPrompt = systemInstruction + dateContext + chatHistoryContext + "User Query: " + message;
+        const finalPrompt = systemInstruction + dateContext + chatHistoryContext + "User Query: " + (message || "Here is an image for you to analyze.");
+
+        // Format API request payload
+        let requestBody = {
+            contents: [{ parts: [] }]
+        };
+
+        // If an image was provided, add it to the parts FIRST
+        if (image) {
+            try {
+                // The frontend sends something like: data:image/png;base64,iVBORw0KGgo...
+                const mimeTypeMatch = image.match(/^data:(image\/\w+);base64,/);
+                if (mimeTypeMatch) {
+                    const mimeType = mimeTypeMatch[1];
+                    const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
+
+                    requestBody.contents[0].parts.push({
+                        inlineData: {
+                            data: base64Data,
+                            mimeType: mimeType
+                        }
+                    });
+                }
+            } catch (imageErr) {
+                 console.error("Error parsing base64 image:", imageErr);
+            }
+        }
+
+        // Add the text prompt AFTER the image
+        requestBody.contents[0].parts.push({ text: finalPrompt });
 
         // Fetch from Google
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: finalPrompt }] }]
-            })
+            body: JSON.stringify(requestBody)
         });
 
         const data = await response.json();
@@ -110,8 +138,13 @@ router.post('/message', protect, async (req, res) => {
         res.json({ reply: botText });
 
     } catch (err) {
-        console.error("Chat Error:", err);
-        res.status(500).send('Server Error');
+        console.error("Chat Error Name:", err.name);
+        console.error("Chat Error Message:", err.message);
+        if (err.response) {
+            console.error("API Response Data:", err.response.data);
+        }
+        console.error("Full Stack:", err.stack);
+        res.status(500).json({ message: 'Server Error', error: err.message });
     }
 });
 

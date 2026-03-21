@@ -280,8 +280,8 @@ body {
 }
 
 .chat-messages::-webkit-scrollbar-thumb {
-    background-color: #e0e0e0;
-    border-radius: 3px;
+    background-color: var(--secondary);
+    border-radius: 4px;
 }
 
 /* Message Groups */
@@ -406,12 +406,62 @@ body {
 
 /* Input Area */
 .chat-input-area {
-    padding: 16px 20px;
-    background: white;
-    border-top: 1px solid var(--border-light);
+    padding: 20px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+}
+
+.input-controls-wrapper {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 15px;
+    width: 100%;
+}
+
+.image-preview-container {
+    display: flex;
+    position: relative;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: var(--background);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    max-width: 120px;
+}
+
+.image-preview-container img {
+    width: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.remove-image-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--error);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.chat-image {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    margin-top: 10px;
+    object-fit: contain;
 }
 
 .attach-btn {
