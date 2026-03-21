@@ -1,6 +1,6 @@
 /* js/auth.js */
 
-const API_Base = '/api/auth';
+const API_Base = `${window.API_BASE_URL}/api/auth`;
 
 /**
  * Handles Signup Form Submission

@@ -53,7 +53,7 @@ async function startNewChat() {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const res = await fetch('/api/sessions', {
+        const res = await fetch(`${window.API_BASE_URL}/api/sessions`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -79,7 +79,7 @@ async function loadSessionList() {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const res = await fetch('/api/sessions', {
+        const res = await fetch(`${window.API_BASE_URL}/api/sessions`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const sessions = await res.json();
@@ -128,7 +128,7 @@ async function deleteSession(sessionId) {
 
     try {
         const token = localStorage.getItem('token');
-        await fetch(`/api/sessions/${sessionId}`, {
+        await fetch(`${window.API_BASE_URL}/api/sessions/${sessionId}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -161,7 +161,7 @@ async function loadSession(sessionId) {
     // Fetch messages
     try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`/api/chat/history?sessionId=${sessionId}`, {
+        const res = await fetch(`${window.API_BASE_URL}/api/chat/history?sessionId=${sessionId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const history = await res.json();
@@ -291,7 +291,7 @@ async function findBestModel() {
         if (!token) return; // Cannot fetch models if not logged in (protected route)
 
         // Fetch from OUR backend now, not Google directly
-        const response = await fetch('/api/chat/models', {
+        const response = await fetch(`${window.API_BASE_URL}/api/chat/models`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
@@ -333,7 +333,7 @@ async function generateResponse(prompt, imageBase64 = null) {
             return;
         }
 
-        const response = await fetch('/api/chat/message', {
+        const response = await fetch(`${window.API_BASE_URL}/api/chat/message`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

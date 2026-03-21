@@ -9,7 +9,11 @@ const app = express();
 // Middleware
 app.use(express.json({ limit: '50mb' })); // Increased limit for Base64 image uploads
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_URL || '*', // Allow Vercel URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.static(path.join(__dirname))); // Serve frontend files
 
 // Connect to MongoDB
