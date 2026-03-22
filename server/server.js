@@ -9,8 +9,13 @@ const app = express();
 // Middleware
 app.use(express.json({ limit: '50mb' })); // Increased limit for Base64 image uploads
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// CORS configuration
+const frontendUrl = process.env.FRONTEND_URL ? 
+    (process.env.FRONTEND_URL.startsWith('http') ? process.env.FRONTEND_URL : `https://${process.env.FRONTEND_URL}`).replace(/\/$/, '') : 
+    '*';
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || '*', // Allow Vercel URL
+    origin: frontendUrl,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
