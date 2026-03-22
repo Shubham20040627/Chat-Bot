@@ -14,7 +14,7 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.static(path.join(__dirname))); // Serve frontend files
+// app.use(express.static(path.join(__dirname))); // Removed static serving for MERN structure
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
